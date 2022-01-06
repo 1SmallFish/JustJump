@@ -1,0 +1,216 @@
+
+import { _decorator, Component, Node, instantiate, Label, Prefab, v2,v3, Sprite } from 'cc';
+import { PlayerController } from './PlayerController';
+const { ccclass, property } = _decorator;
+
+
+/**
+ * Predefined variables
+ * Name = GameManager
+ * DateTime = Sun Dec 19 2021 11:12:21 GMT+0800 (中国标准时间)
+ * Author = liukanshan
+ * FileBasename = GameManager.ts
+ * FileBasenameNoExtension = GameManager
+ * URL = db://assets/Scripts/GameManager.ts
+ * ManualUrl = https://docs.cocos.com/creator/3.3/manual/zh/
+ *
+ */
+ enum GameState{
+    GS_INIT,
+    GS_PLAYING,
+    GS_END,
+};
+@ccclass('GameManager')
+export class GameManager extends Component {
+    // [1]
+    // dummy = '';
+    @property({type:PlayerController})
+    public playerCtrl:PlayerController|null=null
+    public roadLength: Number = 9;
+    public _road:Array<any>=null;
+    // [2]
+    // @property
+    // serializableDummy = 0;
+    @property({type:Prefab})
+    public cubePrefab:Prefab|null=null;
+
+    @property({type:Prefab})
+    public cubePrefabRed:Prefab|null=null;
+
+    private _curState: GameState = GameState.GS_INIT;
+    @property({type: Node})
+    public startMenu: Node = null;
+    @property({type: Label})
+    public score: Label = null;
+    
+
+    start () {
+        // [3]
+        this.curState = GameState.GS_INIT;
+        this.playerCtrl.node.on('JumpEnd', this.onPlayerJumpEnd, this);
+        
+
+        
+
+    }
+    init() {
+        this.playerCtrl.reset();
+
+        this.startMenu.active = true;
+        this.generateRoad();
+        this.playerCtrl.setInputActive(false);
+        this.playerCtrl.node.setPosition(v3());// 为何要设置这个位置??=======>这个位置就是palyer的初始位置
+    }
+    onPlayerJumpEnd(moveIndex: number) {
+        this.checkResult(moveIndex);
+        // 每跳一步,最后加一级楼梯(每跳10步加十级也可以),加到最后
+        this.addBlock()
+        
+    }
+    set curState (value: GameState) {
+        switch(value) {
+            case GameState.GS_INIT:
+                this.init();
+                break;
+            case GameState.GS_PLAYING:
+                this.startMenu.active = false;
+                this.score.string = '0';   // 将步数重置为0
+
+                setTimeout(() => {      //直接设置active会直接开始监听鼠标事件，做了一下延迟处理
+                    this.playerCtrl.setInputActive(true);
+                }, 0.1);
+                break;
+            case GameState.GS_END:
+                break;
+        }
+        this._curState = value;
+    }
+    onStartButtonClicked() {
+        this.curState = GameState.GS_PLAYING;
+    }
+
+    generateRoad(){
+        
+        this.node.removeAllChildren();
+
+        this._road = [];
+        // startPos
+        
+        // this._road.push([0,0]),//存板儿坐标
+        let block:Node =instantiate(this.cubePrefab);//block成为Canvas的后代节点,否则不显示
+        this.node.addChild(block);
+        //存板儿节点
+        this._road.push(v2(0,0))
+        block.setPosition(0,0);
+
+         //1.实例化 prefab,2.设置位置
+         for (let i = 1; i < this.roadLength; i++) {
+            // let block:Node=instantiate(this.cubePrefab);
+            // this.node.addChild(block)
+            
+            // // console.log(this._road[i]===0);
+            // let rand =Math.floor(Math.random() * 2);
+            
+            // let loc=this._road[i-1]
+            
+            // if(rand===0){
+            //     //得知道上一个坐标,最好把这些坐标都计下来
+            //     //0 x坐标减1....1 z坐标减1
+                
+            //     this._road.push(v2(loc.x-75,loc.y+95))
+            //     block.setPosition(loc.x-75,loc.y+95)
+            //     // this._road.push(block)//存板儿节点,用于交集验证
+            // }else if(rand===1){
+            //     this._road.push(v2(loc.x+75,loc.y+95))
+            //     block.setPosition(loc.x+75,loc.y+95)
+            //     // this._road.push(block)
+            // }
+            this.addBlock()
+
+        }   
+    }
+    //加楼梯
+    addBlock(){
+            let block:Node=instantiate(this.cubePrefab);
+            this.node.addChild(block)
+
+            let borad=new Sprite();
+            
+            
+
+            let blockRed:Node=instantiate(this.cubePrefabRed);
+            
+            
+            // console.log(this._road[i]===0);
+            let rand =Math.floor(Math.random() * 2);
+            let isAdd=Math.floor(Math.random() * 3);
+            
+            
+            let loc=this._road[this._road.length-1]
+            
+            if(rand===0){
+                //得知道上一个坐标,最好把这些坐标都计下来
+                //0 x坐标减1....1 z坐标减1
+                
+                this._road.push(v2(loc.x-75,loc.y+95))
+                block.setPosition(loc.x-75,loc.y+95)
+                //相对方向加红块
+                let rand =Math.floor(Math.random() * 2);
+                if(isAdd){
+                    this.node.addChild(blockRed)
+                    blockRed.setPosition(loc.x+75,loc.y+95)
+                }
+                
+                
+            }else if(rand===1){
+                this._road.push(v2(loc.x+75,loc.y+95))
+                block.setPosition(loc.x+75,loc.y+95)
+                let rand =Math.floor(Math.random() * 2);
+                if(isAdd){
+                    this.node.addChild(blockRed)
+                    
+                    blockRed.setPosition(loc.x-75,loc.y+95)
+                }
+            }
+    }
+    checkResult(moveIndex: number) {
+        // console.log(this._road);
+        
+        // if (moveIndex < this.roadLength) {//无尽模式不必判断路长
+            
+            let playerV3=this.playerCtrl.node.getPosition();
+            
+            let roadV2=this._road[moveIndex]
+            // 
+            if (roadV2.x != playerV3.x || roadV2.y!=playerV3.y) {   //跳到了空方块上
+                this.curState = GameState.GS_INIT;
+                
+                
+                console.log('124','跳空了');
+                
+            }else{
+                
+                
+                this.score.string = '' + moveIndex;//没跳空才加分
+            }
+        // } 
+        //无尽版本,没有最大长度
+        // else {    // 跳过了最大长度
+        //     this.curState = GameState.GS_INIT;
+        // }
+    }
+    // update (deltaTime: number) {
+    //     // [4]
+    // }
+}
+
+/**
+ * [1] Class member could be defined like this.
+ * [2] Use `property` decorator if your want the member to be serializable.
+ * [3] Your initialization goes here.
+ * [4] Your update function goes here.
+ *
+ * Learn more about scripting: https://docs.cocos.com/creator/3.3/manual/zh/scripting/
+ * Learn more about CCClass: https://docs.cocos.com/creator/3.3/manual/zh/scripting/ccclass.html
+ * Learn more about life-cycle callbacks: https://docs.cocos.com/creator/3.3/manual/zh/scripting/life-cycle-callbacks.html
+ */

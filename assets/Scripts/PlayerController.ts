@@ -53,12 +53,26 @@ export class PlayerController extends Component {
 
     }
     // 响应触摸事件
-    onTouchEnd(event:TouchEvent){
+    onTouchEnd(event:EventTouch){
+        // window.innerHeight: 667
+//      innerWidth: 375
         
         // console.log(event);
+// console.log("device-width:",(window.screen.width));
+// console.log("point-x:",event.touch._point.x);
+// // console.log(event.touch._point.x>window.screen.width/2);
+// console.log(event.targetTouches);
+console.log(event);
+console.log(window);
+
+
+console.log(event.getLocationX(),window.innerWidth);
+
+
+
         
         
-        if(event.touch._point.x>200){//获取屏幕宽度,设置一半
+        if(event.getLocationX()>window.innerWidth){//获取屏幕宽度,设置一半
         // console.log("getLocation",event.EventTouch); //undefined
 
             this.jumpByStep(2)
@@ -141,10 +155,10 @@ export class PlayerController extends Component {
         if (active) {
             
             // systemEvent.on(SystemEvent.EventType.MOUSE_UP, this.onMouseUp, this);
-            input.on(Input.EventType.TOUCH_START,this.onTouchEnd,this)
+            input.on(Input.EventType.TOUCH_END,this.onTouchEnd,this)
         } else {
             // systemEvent.off(SystemEvent.EventType.MOUSE_UP, this.onMouseUp, this);
-            input.off(Input.EventType.TOUCH_START,this.onTouchEnd,this)
+            input.off(Input.EventType.TOUCH_END,this.onTouchEnd,this)
 
         }
     }

@@ -71,6 +71,8 @@ export class GameManager extends Component {
 
     }
     onLoad() {
+        // console.log();
+        
         
         this.init()
         find('ScrollView',this.startMenu).active=false

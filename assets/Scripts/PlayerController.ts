@@ -62,11 +62,11 @@ export class PlayerController extends Component {
 // console.log("point-x:",event.touch._point.x);
 // // console.log(event.touch._point.x>window.screen.width/2);
 // console.log(event.targetTouches);
-console.log(event);
-console.log(window);
+// console.log(event);
+// console.log(window);
 
 
-console.log(event.getLocationX(),window.innerWidth);
+// console.log(event.getLocationX(),window.innerWidth);
 
 
 

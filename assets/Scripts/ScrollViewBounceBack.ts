@@ -34,7 +34,7 @@ export class ScrollViewBounceBack extends Component {
 
     start () {
         // [3]
-        let arr_infor = [
+        let arr_info = [
             {name:'2504549300',touXiang:0,score:1003},
             {name:'cocoscreator_666',touXiang:1,score:1002},
             {name:'小白程序猿',touXiang:2,score:1001},
@@ -88,6 +88,15 @@ export class ScrollViewBounceBack extends Component {
             {name:'三五七年',touXiang:48,score:Math.round(Math.random() * 1000)},
             {name:'冰落風嘯',touXiang:49,score:Math.round(Math.random() * 1000)},
         ];
+        // 对数据按score看降序排序
+        function sortByKey(arr,key){
+            return arr.sort(function(a,b){
+                var x= a[key];
+                var y = b[key];
+                return y-x
+            })
+        }
+        sortByKey(arr_info,'score')
         
         let com=this.getComponent(ScrollViewBounceBack)
         // this.logLabel = find('view/content/item',this.node)?.getComponent<Label>(Label)!;
@@ -98,12 +107,12 @@ export class ScrollViewBounceBack extends Component {
         // this.logLabel.string = '拖动以查看log打印次数';
 
         // 从数据生成item 加到content
-        for(let i =0;i<arr_infor.length-1;i++){
+        for(let i =0;i<arr_info.length-1;i++){
             let item=instantiate(this.itemPrefab)
 
             this.content.addChild(item)
             item.setPosition(0,-52*i-25)
-            item.getComponent(RankItem).set(i,arr_infor[i]);
+            item.getComponent(RankItem).set(i,arr_info[i]);
             
             
             
